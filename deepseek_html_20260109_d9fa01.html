@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AETHER | Next-Gen Travel Experience</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollToPlugin.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/EasePack.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/CustomEase.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e17;
+            --secondary: #00d9ff;
+            --accent: #ff4d8d;
+            --neon: #00ff9d;
+            --light: #f0f8ff;
+            --dark: #050811;
+            --transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-fast: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            --shadow-glow: 0 0 30px rgba(0, 217, 255, 0.3);
+            --radius: 16px;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            color: var(--light);
+            background-color: var(--primary);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 217, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 77, 141, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 255, 157, 0.03) 0%, transparent 50%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Advanced Header with 3D effect */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 10000;
+            padding: 2rem 0;
+            transition: var(--transition);
+            background: rgba(5, 8, 17, 0.8);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        header.scrolled {
+            padding: 1.2rem 0;
+            background: rgba(5, 8, 17, 0.95);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: transparent;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+            text-shadow: 0 0 15px rgba(0, 217, 255, 0.5);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .logo:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 3rem;
+            position: relative;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--light);
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: var(--transition-fast);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-links a:hover::before {
+            width: 100%;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(0, 217, 255, 0.7);
+        }
+
+        .nav-links li {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-links li::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 217, 255, 0.1), transparent);
+            transform: translateY(100%);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: -1;
+        }
+
+        .nav-links li:hover::after {
+            transform: translateY(0);
+        }
+
+        .cta-button {
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            color: var(--dark);
+            padding: 1.1rem 2.8rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.4);
+            display: inline-block;
+            border: none;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon), var(--secondary));
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+        }
+
+        .cta-button:hover::before {
+            opacity: 1;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.7);
+        }
+
+        /* Advanced Hero with Particle Background */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 5.5rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+            background: linear-gradient(90deg, var(--light), var(--secondary), var(--neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            margin-bottom: 3rem;
+            max-width: 700px;
+            color: rgba(240, 248, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .hero .cta-button {
+            font-size: 1.2rem;
+            padding: 1.4rem 3.5rem;
+        }
+
+        .outline-button {
+            background: transparent;
+            color: var(--secondary);
+            border: 2px solid var(--secondary);
+            padding: 1.4rem 3.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: var(--transition);
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.2rem;
+        }
+
+        .outline-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .outline-button:hover::before {
+            transform: translateX(100%);
+        }
+
+        .outline-button:hover {
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--secondary);
+            font-size: 2rem;
+            z-index: 10;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* 3D Globe Section */
+        .globe-section {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .globe-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .globe-content {
+            position: relative;
+            z-index: 10;
+            max-width: 600px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 4rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-left: 10%;
+        }
+
+        .globe-content h2 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .globe-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            color: rgba(240, 248, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        /* Interactive Destinations */
+        .destinations-section {
+            padding: 8rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 6rem;
+            position: relative;
+        }
+
+        .section-title h2 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .section-title p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.3rem;
+            color: rgba(240, 248, 255, 0.8);
+        }
+
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 3rem;
+            position: relative;
+        }
+
+        .destination-card {
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            transition: var(--transition);
+            position: relative;
+            height: 500px;
+            transform-style: preserve-3d;
+            transform: perspective(1000px) rotateX(0) rotateY(0);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .destination-card:hover {
+            transform: perspective(1000px) rotateX(5deg) rotateY(5deg) translateY(-20px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), var(--shadow-glow);
+        }
+
+        .destination-image {
+            height: 60%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .destination-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .destination-card:hover .destination-image img {
+            transform: scale(1.15);
+        }
+
+        .destination-content {
+            padding: 2.5rem;
+            height: 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .destination-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+
+        .destination-content p {
+            color: rgba(240, 248, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .destination-price {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--neon);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .destination-badge {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            background: linear-gradient(90deg, var(--accent), #ff2e63);
+            color: var(--light);
+            padding: 0.8rem 1.8rem;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(255, 77, 141, 0.4);
+        }
+
+        .destination-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .destination-card:hover .destination-overlay {
+            opacity: 1;
+        }
+
+        .destination-overlay button {
+            background: var(--secondary);
+            color: var(--dark);
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            cursor: pointer;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .destination-card:hover .destination-overlay button {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Parallax Scrolling Section */
+        .parallax-section {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 120%;
+            background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat;
+            z-index: -1;
+            will-change: transform;
+        }
+
+        .parallax-content {
+            text-align: center;
+            max-width: 900px;
+            padding: 5rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        .parallax-content h2 {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .parallax-content p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: rgba(240, 248, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        /* Interactive Timeline */
+        .timeline-section {
+            padding: 8rem 0;
+            position: relative;
+        }
+
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background: linear-gradient(to bottom, var(--secondary), var(--neon));
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            border-radius: 10px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+
+        .timeline-content {
+            padding: 2.5rem;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), var(--shadow-glow);
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background: var(--secondary);
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            border-radius: 3px;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: -10px;
+            background: var(--neon);
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            border-radius: 3px;
+        }
+
+        .timeline-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: var(--light);
+        }
+
+        .timeline-content p {
+            color: rgba(240, 248, 255, 0.8);
+            line-height: 1.7;
+        }
+
+        .timeline-date {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            color: var(--dark);
+            border-radius: 30px;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* 3D Interactive Experience */
+        .experience-section {
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #experience-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .experience-content {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-top: 10%;
+            text-align: center;
+        }
+
+        .experience-content h2 {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(90deg, var(--secondary), var(--neon), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .experience-content p {
+            font-size: 1.3rem;
+            margin-bottom: 3rem;
+            color: rgba(240, 248, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        /* Advanced Footer */
+        footer {
+            background: rgba(5, 8, 17, 0.95);
+            padding: 6rem 0 2rem;
+            border-top: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        footer::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
+            top: -150px;
+            right: -150px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 4rem;
+            margin-bottom: 4rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-column h3 {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            color: var(--light);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .footer-column p {
+            color: rgba(240, 248, 255, 0.7);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .social-links a {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--secondary);
+            text-decoration: none;
+            transition: var(--transition);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: -1;
+        }
+
+        .social-links a:hover::before {
+            opacity: 1;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px) rotate(10deg);
+            color: var(--dark);
+            box-shadow: 0 10px 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 1.2rem;
+        }
+
+        .footer-links a {
+            color: rgba(240, 248, 255, 0.7);
+            text-decoration: none;
+            transition: var(--transition-fast);
+            display: flex;
+            align-items: center;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+            padding-left: 10px;
+        }
+
+        .footer-links i {
+            margin-right: 12px;
+            font-size: 1rem;
+            color: var(--secondary);
+        }
+
+        .copyright {
+            text-align: center;
+            padding-top: 3rem;
+            border-top: 1px solid var(--glass-border);
+            color: rgba(240, 248, 255, 0.5);
+            font-size: 0.9rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(-50%);
+            }
+            50% {
+                transform: translateY(-20px) translateX(-50%);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(0, 217, 255, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(0, 217, 255, 0.8);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                transform: translateX(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Scroll Animation Classes */
+        .animate-element {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+
+        .animate-element.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Cursor Effect */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--secondary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transition: transform 0.3s ease;
+        }
+
+        .cursor-follower {
+            width: 8px;
+            height: 8px;
+            background: var(--neon);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.5s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero h1 {
+                font-size: 4.5rem;
+            }
+            
+            .destinations-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item:nth-child(odd) .timeline-content::after,
+            .timeline-item:nth-child(even) .timeline-content::after {
+                left: 50px;
+                right: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .globe-content {
+                margin: 0 auto;
+                padding: 3rem;
+            }
+            
+            .section-title h2 {
+                font-size: 3rem;
+            }
+            
+            .destinations-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .parallax-content {
+                padding: 3rem;
+            }
+            
+            .parallax-content h2 {
+                font-size: 3rem;
+            }
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 2rem;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: var(--transition);
+            z-index: 10001;
+        }
+
+        .mobile-menu-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100000;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+
+        .loading-content {
+            text-align: center;
+        }
+
+        .loading-text {
+            font-size: 2.5rem;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(90deg, var(--secondary), var(--neon), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+        }
+
+        .loading-bar {
+            width: 300px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--neon));
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <div class="loading-text">AETHER</div>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-follower" id="cursorFollower"></div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">AETHER</a>
+                <ul class="nav-links">
+                    <li><a href="#home">HOME</a></li>
+                    <li><a href="#destinations">DESTINATIONS</a></li>
+                    <li><a href="#experience">EXPERIENCE</a></li>
+                    <li><a href="#timeline">JOURNEY</a></li>
+                    <li><a href="#contact">CONTACT</a></li>
+                </ul>
+                <a href="#contact" class="cta-button">BOOK NOW</a>
+                <div class="mobile-menu-toggle" id="mobileMenuToggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero with Particle Background -->
+    <section class="hero" id="home">
+        <canvas id="particle-canvas"></canvas>
+        <div class="container">
+            <div class="hero-content">
+                <h1>REDEFINE <span style="display:block;">TRAVEL</span></h1>
+                <p>Embark on a journey beyond imagination with AETHER. Experience the future of travel through cutting-edge technology, immersive environments, and personalized adventures across the globe.</p>
+                <div class="hero-buttons">
+                    <a href="#destinations" class="cta-button">EXPLORE DESTINATIONS</a>
+                    <a href="#experience" class="outline-button">VIRTUAL TOUR</a>
+                </div>
+            </div>
+        </div>
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+    </section>
+
+    <!-- 3D Globe Section -->
+    <section class="globe-section">
+        <div class="globe-container" id="globe-container"></div>
+        <div class="container">
+            <div class="globe-content animate-element">
+                <h2>EXPLORE THE GLOBE IN 3D</h2>
+                <p>Interact with our holographic globe to discover destinations in real-time. Rotate, zoom, and explore the world like never before. Click on any location to see immersive previews and available experiences.</p>
+                <a href="#destinations" class="cta-button" style="margin-top: 1.5rem;">START EXPLORING</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Destinations -->
+    <section class="destinations-section" id="destinations">
+        <div class="container">
+            <div class="section-title animate-element">
+                <h2>IMMERSIVE DESTINATIONS</h2>
+                <p>Step into our curated collection of destinations, each with unique interactive experiences and cutting-edge visualizations.</p>
+            </div>
+            <div class="destinations-grid">
+                <div class="destination-card animate-element">
+                    <div class="destination-badge">HOLOGRAPHIC TOUR</div>
+                    <div class="destination-image">
+                        <img src="https://images.unsplash.com/photo-1544551763-46a013bb70d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Tokyo, Japan">
+                        <div class="destination-overlay">
+                            <button class="cta-button">VIEW IN AR</button>
+                        </div>
+                    </div>
+                    <div class="destination-content">
+                        <h3>TOKYO NEO-FUTURE</h3>
+                        <p>Experience Tokyo like never before with augmented reality overlays showing historical transformations and futuristic projections.</p>
+                        <div class="destination-price">FROM $4,999</div>
+                    </div>
+                </div>
+                <div class="destination-card animate-element">
+                    <div class="destination-badge">BIOMETRIC ACCESS</div>
+                    <div class="destination-image">
+                        <img src="https://images.unsplash.com/photo-1564507004663-b6dfb3e2ede5?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Amazon Rainforest">
+                        <div class="destination-overlay">
+                            <button class="cta-button">BIOMETRIC SCAN</button>
+                        </div>
+                    </div>
+                    <div class="destination-content">
+                        <h3>AMAZON BIOME</h3>
+                        <p>Enter the world's largest rainforest with biometric sensors that adapt the environment to your physiological responses.</p>
+                        <div class="destination-price">FROM $5,499</div>
+                    </div>
+                </div>
+                <div class="destination-card animate-element">
+                    <div class="destination-badge">NEURAL EXPERIENCE</div>
+                    <div class="destination-image">
+                        <img src="https://images.unsplash.com/photo-1506970845872-504d6b2d49e8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Northern Lights">
+                        <div class="destination-overlay">
+                            <button class="cta-button">NEURAL SYNC</button>
+                        </div>
+                    </div>
+                    <div class="destination-content">
+                        <h3>ARCTIC AURORA</h3>
+                        <p>Witness the Northern Lights through neural-enhanced vision that reveals hidden spectrums and cosmic connections.</p>
+                        <div class="destination-price">FROM $6,299</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parallax Section -->
+    <section class="parallax-section">
+        <div class="parallax-bg" id="parallaxBg"></div>
+        <div class="container">
+            <div class="parallax-content" id="parallaxContent">
+                <h2>BEYOND THE HORIZON</h2>
+                <p>At AETHER, we don't just book trips—we engineer experiences. Our proprietary technology adapts environments in real-time to match your biometric data, creating truly personalized journeys that evolve with you.</p>
+                <a href="#experience" class="cta-button">EXPERIENCE THE FUTURE</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Timeline -->
+    <section class="timeline-section" id="timeline">
+        <div class="container">
+            <div class="section-title animate-element">
+                <h2>YOUR JOURNEY TIMELINE</h2>
+                <p>Follow the interactive timeline of your AETHER experience from conception to completion.</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline-item animate-element">
+                    <div class="timeline-content">
+                        <div class="timeline-date">PHASE 01</div>
+                        <h3>NEURAL MAPPING</h3>
+                        <p>Our AI analyzes your cognitive patterns, preferences, and subconscious desires to create a personalized travel blueprint.</p>
+                    </div>
+                </div>
+                <div class="timeline-item animate-element">
+                    <div class="timeline-content">
+                        <div class="timeline-date">PHASE 02</div>
+                        <h3>ENVIRONMENT SYNTHESIS</h3>
+                        <p>We generate adaptive environments that respond to your biometric feedback in real-time, creating a truly symbiotic experience.</p>
+                    </div>
+                </div>
+                <div class="timeline-item animate-element">
+                    <div class="timeline-content">
+                        <div class="timeline-date">PHASE 03</div>
+                        <h3>IMMERSIVE DEPLOYMENT</h3>
+                        <p>Step into your personalized reality through our neural interface technology, blending physical and digital seamlessly.</p>
+                    </div>
+                </div>
+                <div class="timeline-item animate-element">
+                    <div class="timeline-content">
+                        <div class="timeline-date">PHASE 04</div>
+                        <h3>POST-JOURNEY INTEGRATION</h3>
+                        <p>Your experiences are encoded into memory enhancement protocols, extending the impact of your journey indefinitely.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D Interactive Experience -->
+    <section class="experience-section" id="experience">
+        <canvas id="experience-canvas"></canvas>
+        <div class="container">
+            <div class="experience-content">
+                <h2>ENTER THE MATRIX</h2>
+                <p>Interact with our 3D environment to preview destinations in real-time. Use your mouse to navigate and explore hidden details in each location.</p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="cta-button">REQUEST ACCESS</a>
+                    <a href="#" class="outline-button" id="toggle3D">TOGGLE 3D MODE</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AETHER</h3>
+                    <p>Pioneering the future of travel through cutting-edge technology and immersive experiences. Redefining what's possible in exploration and adventure.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>TECHNOLOGIES</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-vr-cardboard"></i> Neural Interfaces</a></li>
+                        <li><a href="#"><i class="fas fa-brain"></i> Biometric Adaptation</a></li>
+                        <li><a href="#"><i class="fas fa-cube"></i> Holographic Projection</a></li>
+                        <li><a href="#"><i class="fas fa-atom"></i> Quantum Travel</a></li>
+                        <li><a href="#"><i class="fas fa-microchip"></i> AI Personalization</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>CONTACT</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Quantum Plaza, Neo-Tokyo</a></li>
+                        <li><a href="tel:+811234567890"><i class="fas fa-phone"></i> +81 123 456 7890</a></li>
+                        <li><a href="mailto:access@aether.travel"><i class="fas fa-envelope"></i> access@aether.travel</a></li>
+                        <li><a href="#"><i class="fas fa-clock"></i> 24/7 Neural Support</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 AETHER | Next-Generation Travel Experience | Designed for Advanced Technical Interview Presentation</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Advanced Loading Animation
+        window.addEventListener('load', function() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingProgress = document.getElementById('loadingProgress');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 100) progress = 100;
+                loadingProgress.style.width = `${progress}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        loadingScreen.style.visibility = 'hidden';
+                        // Initialize all effects after loading
+                        initAllEffects();
+                    }, 500);
+                }
+            }, 100);
+        });
+
+        // Custom Cursor Effect
+        const cursor = document.getElementById('cursor');
+        const cursorFollower = document.getElementById('cursorFollower');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            
+            setTimeout(() => {
+                cursorFollower.style.left = e.clientX + 'px';
+                cursorFollower.style.top = e.clientY + 'px';
+            }, 100);
+            
+            // Interactive elements effect
+            const interactiveElements = document.querySelectorAll('a, button, .destination-card, .timeline-content');
+            let isInteractive = false;
+            
+            interactiveElements.forEach(el => {
+                if (el.matches(':hover')) {
+                    isInteractive = true;
+                    cursor.style.transform = 'scale(1.5)';
+                    cursor.style.borderColor = 'var(--neon)';
+                    cursorFollower.style.transform = 'scale(1.8)';
+                    cursorFollower.style.background = 'var(--neon)';
+                }
+            });
+            
+            if (!isInteractive) {
+                cursor.style.transform = 'scale(1)';
+                cursor.style.borderColor = 'var(--secondary)';
+                cursorFollower.style.transform = 'scale(1)';
+                cursorFollower.style.background = 'var(--neon)';
+            }
+        });
+
+        // Advanced Particle System
+        function initParticleSystem() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const particles = [];
+            const particleCount = 150;
+            
+            // Create particles
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedX: (Math.random() - 0.5) * 0.5,
+                    speedY: (Math.random() - 0.5) * 0.5,
+                    color: Math.random() > 0.5 ? 'rgba(0, 217, 255, 0.8)' : 'rgba(255, 77, 141, 0.8)'
+                });
+            }
+            
+            // Draw particles
+            function drawParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw connecting lines
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (distance < 100) {
+                            ctx.beginPath();
+                            ctx.strokeStyle = `rgba(0, 217, 255, ${0.2 * (1 - distance/100)})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+                
+                // Draw particles
+                particles.forEach(particle => {
+                    ctx.beginPath();
+                    ctx.fillStyle = particle.color;
+                    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Update position
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    
+                    // Boundary check
+                    if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
+                    if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
+                });
+                
+                requestAnimationFrame(drawParticles);
+            }
+            
+            drawParticles();
+            
+            // Resize handler
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // GSAP Scroll Animations
+        function initScrollAnimations() {
+            // Animate on scroll
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Header animation
+            gsap.to('#header', {
+                backgroundColor: 'rgba(5, 8, 17, 0.95)',
+                padding: '1.2rem 0',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+                scrollTrigger: {
+                    trigger: 'body',
+                    start: '50px top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+            
+            // Parallax effect
+            gsap.to('#parallaxBg', {
+                yPercent: 30,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: '.parallax-section',
+                    start: 'top bottom',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+            
+            // Parallax content animation
+            gsap.to('#parallaxContent', {
+                y: 0,
+                opacity: 1,
+                duration: 1.5,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: '.parallax-section',
+                    start: 'top 80%',
+                    toggleActions: 'play none none reverse'
+                }
+            });
+            
+            // Timeline animations
+            gsap.utils.toArray('.timeline-item').forEach((item, i) => {
+                gsap.to(item, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: item,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+            
+            // Destination cards animations
+            gsap.utils.toArray('.destination-card').forEach((card, i) => {
+                gsap.to(card, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1,
+                    delay: i * 0.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+            
+            // Other elements
+            gsap.utils.toArray('.animate-element').forEach((element, i) => {
+                gsap.to(element, {
+                    opacity: 1,
+                    y: 0,
+                    duration: 1.2,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                });
+            });
+        }
+
+        // 3D Globe using Three.js
+        function init3DGlobe() {
+            const container = document.getElementById('globe-container');
+            
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0x000000, 0);
+            container.appendChild(renderer.domElement);
+            
+            // Create earth
+            const geometry = new THREE.SphereGeometry(5, 32, 32);
+            const texture = new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/earth_atmos_2048.jpg');
+            const material = new THREE.MeshPhongMaterial({ map: texture, transparent: true });
+            const earth = new THREE.Mesh(geometry, material);
+            scene.add(earth);
+            
+            // Add atmosphere
+            const atmosphereGeometry = new THREE.SphereGeometry(5.1, 32, 32);
+            const atmosphereMaterial = new THREE.MeshPhongMaterial({
+                color: 0x00aaff,
+                transparent: true,
+                opacity: 0.2
+            });
+            const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+            scene.add(atmosphere);
+            
+            // Add stars
+            const starGeometry = new THREE.SphereGeometry(80, 64, 64);
+            const starMaterial = new THREE.MeshBasicMaterial({
+                map: new THREE.TextureLoader().load('https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/starry_sky.jpg'),
+                side: THREE.BackSide
+            });
+            const starField = new THREE.Mesh(starGeometry, starMaterial);
+            scene.add(starField);
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 3, 5);
+            scene.add(directionalLight);
+            
+            camera.position.z = 15;
+            
+            // Mouse controls
+            let mouseX = 0;
+            let mouseY = 0;
+            let targetRotationX = 0;
+            let targetRotationY = 0;
+            
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = (event.clientY / window.innerHeight) * 2 - 1;
+            });
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Smooth rotation based on mouse position
+                targetRotationY = mouseX * 0.5;
+                targetRotationX = mouseY * 0.2;
+                
+                earth.rotation.y += (targetRotationY - earth.rotation.y) * 0.05;
+                earth.rotation.x += (targetRotationX - earth.rotation.x) * 0.05;
+                atmosphere.rotation.y += 0.001;
+                
+                // Auto-rotate when mouse is not moving
+                if (Math.abs(mouseX) < 0.1 && Math.abs(mouseY) < 0.1) {
+                    earth.rotation.y += 0.002;
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        // 3D Interactive Experience
+        function init3DExperience() {
+            const canvas = document.getElementById('experience-canvas');
+            
+            // Scene setup
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            renderer.setClearColor(0x050811, 1);
+            
+            // Add floating geometric shapes
+            const shapes = [];
+            const geometryTypes = [
+                new THREE.IcosahedronGeometry(1, 0),
+                new THREE.OctahedronGeometry(1.2, 0),
+                new THREE.TetrahedronGeometry(1.5, 0),
+                new THREE.DodecahedronGeometry(1, 0)
+            ];
+            
+            const materials = [
+                new THREE.MeshPhongMaterial({ color: 0x00d9ff, transparent: true, opacity: 0.8 }),
+                new THREE.MeshPhongMaterial({ color: 0xff4d8d, transparent: true, opacity: 0.8 }),
+                new THREE.MeshPhongMaterial({ color: 0x00ff9d, transparent: true, opacity: 0.8 }),
+                new THREE.MeshPhongMaterial({ color: 0xffd700, transparent: true, opacity: 0.8 })
+            ];
+            
+            // Create floating shapes
+            for (let i = 0; i < 20; i++) {
+                const geometry = geometryTypes[Math.floor(Math.random() * geometryTypes.length)];
+                const material = materials[Math.floor(Math.random() * materials.length)];
+                const shape = new THREE.Mesh(geometry, material);
+                
+                shape.position.x = (Math.random() - 0.5) * 30;
+                shape.position.y = (Math.random() - 0.5) * 30;
+                shape.position.z = (Math.random() - 0.5) * 30;
+                
+                shape.rotationSpeed = {
+                    x: Math.random() * 0.02 - 0.01,
+                    y: Math.random() * 0.02 - 0.01,
+                    z: Math.random() * 0.02 - 0.01
+                };
+                
+                shape.floatSpeed = Math.random() * 0.02 + 0.01;
+                shape.floatOffset = Math.random() * Math.PI * 2;
+                
+                scene.add(shape);
+                shapes.push(shape);
+            }
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0x333333);
+            scene.add(ambientLight);
+            
+            const directionalLight1 = new THREE.DirectionalLight(0x00d9ff, 0.8);
+            directionalLight1.position.set(5, 5, 5);
+            scene.add(directionalLight1);
+            
+            const directionalLight2 = new THREE.DirectionalLight(0xff4d8d, 0.6);
+            directionalLight2.position.set(-5, -5, -5);
+            scene.add(directionalLight2);
+            
+            camera.position.z = 25;
+            
+            // Mouse interaction
+            let mouseX = 0;
+            let mouseY = 0;
+            
+            document.addEventListener('mousemove', (event) => {
+                mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+                mouseY = (event.clientY / window.innerHeight) * 2 - 1;
+            });
+            
+            // Animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                // Rotate camera based on mouse position
+                camera.position.x += (mouseX * 10 - camera.position.x) * 0.05;
+                camera.position.y += (-mouseY * 10 - camera.position.y) * 0.05;
+                camera.lookAt(scene.position);
+                
+                // Animate shapes
+                shapes.forEach((shape, i) => {
+                    shape.rotation.x += shape.rotationSpeed.x;
+                    shape.rotation.y += shape.rotationSpeed.y;
+                    shape.rotation.z += shape.rotationSpeed.z;
+                    
+                    // Float up and down
+                    shape.position.y += Math.sin(Date.now() * 0.001 * shape.floatSpeed + shape.floatOffset) * 0.02;
+                });
+                
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+            });
+            
+            // Toggle 3D mode
+            document.getElementById('toggle3D').addEventListener('click', (e) => {
+                e.preventDefault();
+                canvas.classList.toggle('fullscreen');
+                if (canvas.classList.contains('fullscreen')) {
+                    canvas.style.position = 'fixed';
+                    canvas.style.top = '0';
+                    canvas.style.left = '0';
+                    canvas.style.width = '100vw';
+                    canvas.style.height = '100vh';
+                    canvas.style.zIndex = '1000';
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                } else {
+                    canvas.style.position = 'absolute';
+                    canvas.style.width = '100%';
+                    canvas.style.height = '100%';
+                    canvas.style.zIndex = '1';
+                    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+                }
+            });
+        }
+
+        // Initialize all effects
+        function initAllEffects() {
+            initParticleSystem();
+            initScrollAnimations();
+            init3DGlobe();
+            init3DExperience();
+            
+            // Mobile menu toggle
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            mobileMenuToggle.addEventListener('click', () => {
+                navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+                if (navLinks.style.display === 'flex') {
+                    navLinks.style.flexDirection = 'column';
+                    navLinks.style.position = 'fixed';
+                    navLinks.style.top = '80px';
+                    navLinks.style.left = '0';
+                    navLinks.style.width = '100%';
+                    navLinks.style.backgroundColor = 'rgba(5, 8, 17, 0.98)';
+                    navLinks.style.backdropFilter = 'blur(20px)';
+                    navLinks.style.padding = '3rem';
+                    navLinks.style.boxShadow = '0 20px 40px rgba(0,0,0,0.5)';
+                    navLinks.style.gap = '2rem';
+                    navLinks.style.zIndex = '9999';
+                }
+            });
+            
+            // Destination card interaction
+            document.querySelectorAll('.destination-card').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateY = ((x - centerX) / centerX) * 5;
+                    const rotateX = ((centerY - y) / centerY) * 5;
+                    
+                    card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-20px)`;
+                });
+                
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+                });
+            });
+            
+            // Smooth scrolling for navigation
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        gsap.to(window, {
+                            duration: 1.5,
+                            scrollTo: {
+                                y: targetElement,
+                                offsetY: 80
+                            },
+                            ease: "power3.inOut"
+                        });
+                    }
+                });
+            });
+        }
+
+        // Initialize when page is loaded
+        window.addEventListener('load', initAllEffects);
+    </script>
+</body>
+</html>
